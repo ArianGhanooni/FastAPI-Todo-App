@@ -1,0 +1,41 @@
+from fastapi import FastAPI
+from fastapi_swagger import patch_fastapi
+from contextlib import asynccontextmanager
+from tasks.routes import router as tasks_router
+
+
+tags_metadata = [
+    {"name": "tasks",
+     "description": "Tasks API",
+     "externalDocs": {
+         "description": "More About Tasks",
+         "url": "http://localhost:8000/tasks"
+     }
+     }
+]
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Application started")
+    yield
+    print("Application finished")
+
+
+# Use patch_fastapi to enable offline Swagger docs
+app = FastAPI(lifespan=lifespan, openapi_tags=tags_metadata,
+              docs_url=None, swagger_ui_oauth2_swagger=None,
+              title="ToDo Application",
+              description="This is a Section for Description",
+              version="0.0.1",
+              contact={
+                  "name": "Arian Ghanooni",
+                  "url": "http://arianghanooni.github.io/",
+                  "email": "ghanooni.ari@gmail.com",
+              },
+              license_info={
+                "name": "MIT"
+              })
+patch_fastapi(app)
+
+app.include_router(tasks_router)
