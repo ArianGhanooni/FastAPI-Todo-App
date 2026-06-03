@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path, Depends, HTTPException
+from fastapi import APIRouter, Path, Depends, HTTPException, Query
 from fastapi.responses import Response
 from tasks.schemas import TaskResponseSchema, TaskCreateSchema, TaskUpdateSchema
 from tasks.models import TaskModel
@@ -11,9 +11,15 @@ router = APIRouter(tags=["tasks"])
 
 
 @router.get("/tasks", response_model=List[TaskResponseSchema])
-async def retrieve_tasks_list(db: Session = Depends(get_db)):
-    result = db.query(TaskModel).all()
-    return result
+async def retrieve_tasks_list(completed: bool = Query(None, description="Filter by completed status"),
+                              limit: int =  Query(10, gt=0, le=50, description="Limiting the number of item to retrieve"),
+                              offset: int =  Query(0, ge=0, description="how many items to retrieve"),
+                              db: Session = Depends(get_db)):
+
+    query = db.query(TaskModel)
+    if completed:
+        query = query.filter_by(is_completed=completed)
+    return query.limit(limit).offset(offset).all()
 
 
 @router.get("/tasks/{task_id}", response_model=TaskResponseSchema)
