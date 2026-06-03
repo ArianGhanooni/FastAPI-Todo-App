@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi_swagger import patch_fastapi
 from contextlib import asynccontextmanager
 from tasks.routes import router as tasks_router
+from user.routes import router as users_router
 
 
 tags_metadata = [
@@ -39,3 +40,4 @@ app = FastAPI(lifespan=lifespan, openapi_tags=tags_metadata,
 patch_fastapi(app)
 
 app.include_router(tasks_router)
+app.include_router(users_router)
