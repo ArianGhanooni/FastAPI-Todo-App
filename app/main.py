@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi_swagger import patch_fastapi
+from auth.basic_auth import get_current_user
+from user.models import UserModel
 from contextlib import asynccontextmanager
 from tasks.routes import router as tasks_router
 from user.routes import router as users_router
@@ -41,3 +43,14 @@ patch_fastapi(app)
 
 app.include_router(tasks_router)
 app.include_router(users_router)
+
+
+@app.get("/public")
+def public_route():
+    return {"message": "Hello, This is a Public route"}
+
+
+@app.get("/private")
+def private_route(user: UserModel = Depends(get_current_user)):
+    print(user)
+    return {"message": "Hello, This is a Private route"}
