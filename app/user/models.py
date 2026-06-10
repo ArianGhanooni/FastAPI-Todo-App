@@ -1,5 +1,5 @@
 from core.database import Base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import bcrypt
@@ -33,3 +33,14 @@ class UserModel(Base):
 
     def set_password(self, plain_password):
         self.password = self.hash_password(plain_password)
+
+
+class TokenModel(Base):
+    __tablename__ = "tokens"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    token = Column(String, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+
+    user = relationship("UserModel", uselist=False)
