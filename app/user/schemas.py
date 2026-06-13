@@ -18,3 +18,7 @@ class UserSignupSchema(BaseModel):
         if not password_confirm == validators.data.get("password"):
             raise ValueError("Password does not match")
         return password_confirm
+
+
+class UserRefreshTokenSchema(BaseModel):
+    refresh_token: str = (Field(..., description="REFRESH TOKEN"))

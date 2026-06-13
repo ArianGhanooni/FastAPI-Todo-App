@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi_swagger import patch_fastapi
 from auth.token_auth import get_authenticated_user
+from auth.jwt_auth import get_authenticated_jwt_user
 from auth.basic_auth import get_current_user
 from user.models import UserModel, TokenModel
 from contextlib import asynccontextmanager
@@ -59,5 +60,11 @@ def private_route(user: UserModel = Depends(get_current_user)):
 
 @app.get("/private_token")
 def private_route(user: UserModel = Depends(get_authenticated_user)):
+    print(user.username)
+    return ({"message": "Hello, This is a Private Token route"})
+
+
+@app.get("/jwt_token")
+def jwt_token(user: UserModel = Depends(get_authenticated_jwt_user)):
     print(user.username)
     return {"message": "Hello, This is a Private Token route"}

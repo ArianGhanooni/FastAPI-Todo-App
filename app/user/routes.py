@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
-from user.schemas import UserLoginSchema, UserSignupSchema
+from user.schemas import UserLoginSchema, UserSignupSchema, UserRefreshTokenSchema
 from user.models import UserModel, TokenModel
 from sqlalchemy.orm import Session
 from core.database import get_db
+from auth.jwt_auth import generate_access_token, refresh_access_token, decode_refresh_token
 import secrets
+
 
 router = APIRouter(tags=["users"], prefix="/users")
 
@@ -27,9 +29,12 @@ async def user_login(request: UserLoginSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(token_obj)
 
+    access_token = generate_access_token(user.id)
+    refresh_token = refresh_access_token(user.id)
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"message": "Login successful", "token": token_obj.token, "user_id": user.id}
+        content={"message": "Login successful", "token": token_obj.token, "user_id": user.id, "access_token":access_token, "refresh_token":refresh_token}
     )
 
 
@@ -51,4 +56,15 @@ async def user_signup(request: UserSignupSchema, db: Session = Depends(get_db)):
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"message": "User registered successfully", "user_id": user_obj.id}
+    )
+
+
+@router.post("/refresh_token")
+def user_refresh_token(request: UserRefreshTokenSchema, db: Session = Depends(get_db)):
+    user_id = decode_refresh_token(request.refresh_token)
+    access_token = generate_access_token(user_id)
+
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "User registered successfully", "Refresh_Token": access_token}
     )
